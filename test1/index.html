@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyperspectral Image Viewer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hyperspectral Image Viewer</h1>
+        </header>
+
+        <div class="main-content">
+            <div class="controls-panel">
+                <section class="control-group">
+                    <h2>File Upload</h2>
+                    <div class="file-upload">
+                        <input type="file" id="fileInput" multiple webkitdirectory directory>
+                        <label for="fileInput" class="file-label">Select Folder</label>
+                        <div id="fileStatus" class="file-status"></div>
+                    </div>
+                </section>
+
+                <section class="control-group">
+                    <h2>Calibration</h2>
+                    <div class="button-group">
+                        <button id="darkCalibBtn" class="btn btn-calibration" disabled>Dark Field Calibration</button>
+                        <button id="whiteCalibBtn" class="btn btn-calibration" disabled>White Field Calibration</button>
+                    </div>
+                    <div id="calibStatus" class="calib-status"></div>
+                </section>
+
+                <section class="control-group">
+                    <h2>Channel Selection</h2>
+                    <div class="channel-control">
+                        <label for="rChannel">R Channel:</label>
+                        <select id="rChannel" class="channel-select" disabled></select>
+                        <span id="rWavelength" class="wavelength-display"></span>
+                    </div>
+                    <div class="channel-control">
+                        <label for="gChannel">G Channel:</label>
+                        <select id="gChannel" class="channel-select" disabled></select>
+                        <span id="gWavelength" class="wavelength-display"></span>
+                    </div>
+                    <div class="channel-control">
+                        <label for="bChannel">B Channel:</label>
+                        <select id="bChannel" class="channel-select" disabled></select>
+                        <span id="bWavelength" class="wavelength-display"></span>
+                    </div>
+                </section>
+
+                <section class="control-group">
+                    <h2>Visualization Gain</h2>
+                    <div class="gain-control">
+                        <label for="gainAlgorithm">Gain Algorithm:</label>
+                        <select id="gainAlgorithm" class="channel-select">
+                            <option value="percentile-gamma" selected>Percentile + Gamma (Recommended)</option>
+                            <option value="percentile">Percentile Stretch (2%-98%)</option>
+                            <option value="gamma">Gamma Correction</option>
+                            <option value="linear">Linear Stretch</option>
+                            <option value="log">Logarithmic Stretch</option>
+                            <option value="histogram">Histogram Equalization</option>
+                            <option value="raw">Raw Data (No Processing)</option>
+                        </select>
+                    </div>
+                    <div class="gain-control">
+                        <label for="rGain">R Gain:</label>
+                        <div class="gain-input-group">
+                            <input type="range" id="rGain" min="-4096" max="4096" value="0" step="1" class="gain-slider" disabled>
+                            <input type="number" id="rGainInput" min="-4096" max="4096" value="0" class="gain-input" disabled>
+                        </div>
+                    </div>
+                    <div class="gain-control">
+                        <label for="gGain">G Gain:</label>
+                        <div class="gain-input-group">
+                            <input type="range" id="gGain" min="-4096" max="4096" value="0" step="1" class="gain-slider" disabled>
+                            <input type="number" id="gGainInput" min="-4096" max="4096" value="0" class="gain-input" disabled>
+                        </div>
+                    </div>
+                    <div class="gain-control">
+                        <label for="bGain">B Gain:</label>
+                        <div class="gain-input-group">
+                            <input type="range" id="bGain" min="-4096" max="4096" value="0" step="1" class="gain-slider" disabled>
+                            <input type="number" id="bGainInput" min="-4096" max="4096" value="0" class="gain-input" disabled>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="control-group">
+                    <button id="renderBtn" class="btn btn-primary" disabled>Manual Refresh (Auto: ON)</button>
+                    <div class="auto-render-info">
+                        <small>Auto-render: Channel selection & algorithm changes instantly. Sliders at ~10 FPS.</small>
+                    </div>
+                </section>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="hsiCanvas"></canvas>
+                <div id="renderStatus" class="render-status"></div>
+            </div>
+
+            <div class="spectrum-panel">
+                <section class="control-group">
+                    <h2>Spectrum Analysis</h2>
+                    <div class="spectrum-controls">
+                        <div class="smooth-control">
+                            <label for="smoothLevel">Smooth Level:</label>
+                            <input type="range" id="smoothLevel" min="0" max="8" value="0" step="1">
+                            <span id="smoothLevelValue">Off</span>
+                        </div>
+                        <button id="anchorBtn" class="btn btn-anchor">Anchor Point</button>
+                        <span id="anchorHint" class="anchor-hint"></span>
+                    </div>
+                </section>
+
+                <div class="spectrum-chart-container">
+                    <canvas id="spectrumChart"></canvas>
+                    <div id="spectrumStatus" class="spectrum-status"></div>
+                </div>
+
+                <section class="control-group">
+                    <h2>Annotation List (Mock Data)</h2>
+                    <div class="annotation-list" id="annotationList">
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="hsi-parser.js"></script>
+    <script src="hsi-renderer.js"></script>
+    <script src="spectrum-extractor.js"></script>
+    <script src="spectrum-chart.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

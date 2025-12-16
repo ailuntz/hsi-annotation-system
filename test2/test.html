@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> 光谱数据标注工具功能演示</title>
+  <link rel="stylesheet" href="test.css">
+</head>
+<body>
+  <script src="https://unpkg.com/canvas-select@^2/lib/canvas-select.min.js"></script>
+  <div class="header">
+    <h3> 光谱数据标注工具功能演示</h3>
+  </div>
+  <div class="main-container">
+    <!-- 内容区域 -->
+    <div class="content-area">
+      <!-- 左侧边栏 -->
+      <div class="left-sidebar">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+          <div class="status-item">
+            <span>📍 鼠标位置:</span>
+            <span id="mousePos">0, 0</span>
+          </div>
+          <div class="status-item">
+            <span>📍 坐标位置:</span>
+            <span id="mousePos2">0, 0</span>
+          </div>
+          <div class="status-item">
+            <span>📏 缩放比例:</span>
+            <span id="scaleInfo">100%</span>
+          </div>
+          <div class="status-item">
+            <span>📊 标注数量:</span>
+            <span id="shapeCount">0</span>
+          </div>
+          <div class="status-item">
+            <span>🎯 当前模式:</span>
+            <span id="currentMode">选择模式</span>
+          </div>
+        </div>
+
+        <!-- 帮助信息 -->
+        <div class="help-section">
+          <h4>💡 操作提示</h4>
+          <ul>
+            <li><strong>矩形:</strong> 按住鼠标左键拖动创建</li>
+            <li><strong>多边形:</strong> 左键点击添加点，点击起始点闭合，ESC退出，Backspace删除上一点</li>
+            <li><strong>点标注:</strong> 左键单击创建</li>
+            <li><strong>折线:</strong> 左键点击添加点，双击完成，ESC退出</li>
+            <li><strong>圆形:</strong> 按住左键拖动确定半径</li>
+            <li><strong>网格:</strong> 右键设置行列数，双击单元格选中/取消</li>
+            <li><strong>画笔:</strong> 按住左键拖动绘制</li>
+            <li><strong>橡皮擦:</strong> 按住左键拖动擦除</li>
+            <li><strong>画布操作:</strong> 右键拖动画布，滚轮缩放，Backspace删除选中形状</li>
+          </ul>
+        </div>
+      </div>
+      <div class="canvas-section">
+        <div class="canvas-container">
+          <canvas class="canvas"></canvas>
+        </div>
+
+        <div class="data-section">
+          <h4>📊 标注数据输出</h4>
+          <div class="data-output" id="dataOutput">等待标注数据...</div>
+
+          <h4 style="margin-top: 15px;">📝 事件日志</h4>
+          <div class="event-log" id="eventLog">
+            <div class="event-item">系统已初始化，等待操作...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-section">
+        <!-- 创建工具 -->
+        <div class="control-group">
+          <h3>🎨 创建工具</h3>
+          <div class="button-grid">
+            <button class="btn" onclick="setCreateType(0)" id="btn-0">选择模式</button>
+            <button class="btn" onclick="setCreateType(1)" id="btn-1">矩形</button>
+            <button class="btn" onclick="setCreateType(2)" id="btn-2">多边形</button>
+            <button class="btn" onclick="setCreateType(3)" id="btn-3">点标注</button>
+            <button class="btn" onclick="setCreateType(4)" id="btn-4">折线</button>
+            <button class="btn" onclick="setCreateType(5)" id="btn-5">圆形</button>
+            <button class="btn" onclick="setCreateType(6)" id="btn-6">网格</button>
+            <button class="btn" onclick="setCreateType(7)" id="btn-7">画笔</button>
+            <button class="btn" onclick="setCreateType(8)" id="btn-8">橡皮擦</button>
+          </div>
+        </div>
+
+        <!-- 数据操作 -->
+        <div class="control-group">
+          <h3>💾 数据操作</h3>
+          <div class="button-grid">
+            <button class="btn" onclick="loadSampleData()">加载示例数据</button>
+            <button class="btn" onclick="clearAllData()">清空所有数据</button>
+            <button class="btn" onclick="exportData()">导出数据</button>
+            <button class="btn" onclick="importData()">导入数据</button>
+          </div>
+
+          <div class="button-grid">
+            <button class="btn danger" onclick="deleteSelected()">删除选中</button>
+            <button class="btn" onclick="clearBrush()">清除画笔</button>
+          </div>
+        </div>
+
+        <!-- 视图控制 -->
+        <div class="control-group">
+          <h3>🔍 视图控制</h3>
+          <div class="button-grid">
+            <button class="btn" onclick="zoomIn()">放大</button>
+            <button class="btn" onclick="zoomOut()">缩小</button>
+            <button class="btn" onclick="fitZoom()">适配画布</button>
+            <button class="btn" onclick="toggleFocusMode()">专注模式</button>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="showCross" onchange="toggleCross()">
+            <label for="showCross">显示十字坐标线</label>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="scrollZoom" checked onchange="toggleScrollZoom()">
+            <label for="scrollZoom">鼠标滚轮缩放</label>
+          </div>
+        </div>
+
+        <!-- 模式设置 -->
+        <div class="control-group">
+          <h3>⚙️ 模式设置</h3>
+          <div class="checkbox-group">
+            <input type="checkbox" id="readonly" onchange="toggleReadonly()">
+            <label for="readonly">只读模式</label>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="lock" onchange="toggleLock()">
+            <label for="lock">锁定画布</label>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="showRotation" onchange="toggleShowRotation()">
+            <label for="showRotation">矩形旋转控制</label>
+          </div>
+        </div>
+
+        <!-- 样式设置 -->
+        <div class="control-group">
+          <h3>🎨 样式设置</h3>
+          <div class="input-group">
+            <label>边框颜色</label>
+            <input type="color" class="color-input" id="strokeStyle" value="#00ff00" onchange="updateStyle()">
+          </div>
+
+          <div class="input-group">
+            <label>填充颜色</label>
+            <input type="color" class="color-input" id="fillStyle" value="#0000ff" onchange="updateStyle()">
+          </div>
+
+          <div class="input-group">
+            <label>边框宽度: <span id="lineWidthValue">1</span></label>
+            <input type="range" class="range-input" id="lineWidth" min="1" max="10" value="1" onchange="updateStyle()">
+          </div>
+
+          <div class="input-group">
+            <label>控制点大小: <span id="ctrlRadiusValue">3</span></label>
+            <input type="range" class="range-input" id="ctrlRadius" min="2" max="10" value="3" onchange="updateStyle()">
+          </div>
+        </div>
+
+        <!-- 画笔设置 -->
+        <div class="control-group">
+          <h3>🖌️ 画笔设置</h3>
+          <div class="input-group">
+            <label>画笔颜色</label>
+            <input type="color" class="color-input" id="brushColor" value="#ff0000" onchange="updateBrushStyle()">
+          </div>
+
+          <div class="input-group">
+            <label>画笔大小: <span id="brushSizeValue">20</span></label>
+            <input type="range" class="range-input" id="brushSize" min="1" max="50" value="20" onchange="updateBrushStyle()">
+          </div>
+
+          <div class="input-group">
+            <label>橡皮擦大小: <span id="eraserSizeValue">20</span></label>
+            <input type="range" class="range-input" id="eraserSize" min="5" max="100" value="20" onchange="updateEraserStyle()">
+          </div>
+        </div>
+
+        <!-- 标签设置 -->
+        <div class="control-group">
+          <h3>🏷️ 标签设置</h3>
+          <div class="input-group">
+            <label>标签字体</label>
+            <select id="labelFont" onchange="updateLabelStyle()">
+              <option value="10px sans-serif">10px 默认字体</option>
+              <option value="12px sans-serif">12px 默认字体</option>
+              <option value="14px sans-serif">14px 默认字体</option>
+              <option value="10px Arial">10px Arial</option>
+              <option value="12px Arial">12px Arial</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>标签背景色</label>
+            <input type="color" class="color-input" id="labelFillStyle" value="#ffffff" onchange="updateLabelStyle()">
+          </div>
+
+          <div class="input-group">
+            <label>标签文字颜色</label>
+            <input type="color" class="color-input" id="textFillStyle" value="#000000" onchange="updateLabelStyle()">
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="hideLabel" onchange="updateLabelStyle()">
+            <label for="hideLabel">隐藏标签</label>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="labelUp" onchange="updateLabelStyle()">
+            <label for="labelUp">标签显示在上方</label>
+          </div>
+        </div>
+
+        <!-- 图片操作 -->
+        <div class="control-group">
+          <h3>🖼️ 图片操作</h3>
+          <div class="input-group">
+            <label>图片URL</label>
+            <input type="text" id="imageUrl" placeholder="输入图片URL" value="test.png">
+          </div>
+          <div class="button-grid">
+            <button class="btn" onclick="changeImage()">更换图片</button>
+            <button class="btn" onclick="loadLocalImage()">本地图片</button>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="test.js"></script>
+</body>
+</html>
